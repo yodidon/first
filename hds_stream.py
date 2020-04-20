@@ -239,10 +239,10 @@ def showMovies(sSearch = ''):
     oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
     sHtmlContent = oRequestHandler.request() #requete aussi
 
-    sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
+    
     #la fonction replace est pratique pour supprimer un code du resultat
 
-    sPattern = 'class="movie movie-block"><img src="([^"]+)" alt=".+?" title="([^"]+)"/>.+?<h2 onclick="window.location.href=\'([^"]+)\'">.+?<div style="color:#F29000">.+?<div.+?>(.+?)</div>'
+    sPattern = 'class="data".+?href="([^"]+)">([^<]+).+?img src="([^"]+)"'
     #pour faire simple recherche ce bout de code dans le code source de l'url
     #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
     #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
@@ -274,12 +274,12 @@ def showMovies(sSearch = ''):
 
             #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
             #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
+            sUrl2 = aEntry[0]
             sTitle = aEntry[1]
-            sUrl2 = aEntry[2]
-            sThumb = aEntry[0]
-            sLang = aEntry[3]
-            sQual = aEntry[4]
-            sHoster = aEntry[5]
+            sThumb ='https:' +  aEntry[2]
+            #sLang = aEntry[3]
+            #sQual = aEntry[4]
+            #sHoster = aEntry[5]
             sDesc = ''
 
             sTitle = sTitle.replace('En streaming', '')
