@@ -19,7 +19,6 @@ SITE_DESC = 'Film streaming HD complet en vf. Des films et séries pour les fan 
 
 URL_MAIN = 'https://ww4.hds-stream.to/' #url de votre source
 
-#definis les url pour les catégories principale, ceci est automatique, si la definition est présente elle sera affichee.
 #LA RECHERCHE GLOBAL N'UTILE PAS showSearch MAIS DIRECTEMENT LA FONCTION INSCRITE DANS LA VARIABLE URL_SEARCH_*
 URL_SEARCH = (URL_MAIN + '?s=', 'showMovies')
 #recherche global films
@@ -429,4 +428,4 @@ def seriesHosters(): #cherche les episodes de series
 
     oGui.setEndOfDirectory()
 
-#Voila c'est un peux brouillon mais ça devrait aider un peu, n'hesitez pas a poser vos questions et meme a partager vos sources.
+
