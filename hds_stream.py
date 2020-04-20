@@ -274,12 +274,12 @@ def showMovies(sSearch = ''):
 
             #L'array affiche vos info dans l'orde de sPattern en commencant a 0, attention dans ce cas la on recupere 6 information
             #Mais selon votre regex il ne peut y en avoir que 2 ou 3.
+            sUrl2 = aEntry[0]
             sTitle = aEntry[1]
-            sUrl2 = aEntry[2]
-            sThumb = aEntry[0]
-            sLang = aEntry[3]
-            sQual = aEntry[4]
-            sHoster = aEntry[5]
+            sThumb ='https:' +  aEntry[2]
+            #sLang = aEntry[3]
+            #sQual = aEntry[4]
+            #sHoster = aEntry[5]
             sDesc = ''
 
             sTitle = sTitle.replace('En streaming', '')
