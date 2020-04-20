@@ -239,10 +239,10 @@ def showMovies(sSearch = ''):
     oRequestHandler = cRequestHandler(sUrl) #envoye une requete a l'url
     sHtmlContent = oRequestHandler.request() #requete aussi
 
-    sHtmlContent = sHtmlContent.replace('<span class="likeThis">', '').replace('</span>', '')
+    
     #la fonction replace est pratique pour supprimer un code du resultat
 
-    sPattern = 'class="movie movie-block"><img src="([^"]+)" alt=".+?" title="([^"]+)"/>.+?<h2 onclick="window.location.href=\'([^"]+)\'">.+?<div style="color:#F29000">.+?<div.+?>(.+?)</div>'
+    sPattern = 'class="data".+?href="([^"]+)">([^<]+).+?img src="([^"]+)"'
     #pour faire simple recherche ce bout de code dans le code source de l'url
     #- "([^"]+)" je veux cette partie de code qui se trouve entre guillemets mais pas de guillemets dans la chaine
     #- .+? je ne veux pas cette partie et peux importe ceux qu'elle contient
