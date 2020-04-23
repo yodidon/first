@@ -1,18 +1,21 @@
 #-*- coding: utf-8 -*-
 #Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Votre nom ou pseudo
-from resources.lib.gui.hoster import cHosterGui #systeme de recherche pour l'hote
-from resources.lib.gui.gui import cGui #systeme d'affichage pour xbmc
-from resources.lib.handler.inputParameterHandler import cInputParameterHandler #entree des parametres
-from resources.lib.handler.outputParameterHandler import cOutputParameterHandler #sortie des parametres
-from resources.lib.handler.requestHandler import cRequestHandler #requete url
-from resources.lib.parser import cParser #recherche de code
+from resources.lib.gui.hoster import cHosterGui
+from resources.lib.gui.gui import cGui
+from resources.lib.handler.inputParameterHandler import cInputParameterHandler
+from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
+from resources.lib.handler.requestHandler import cRequestHandler
+from resources.lib.parser import cParser
 from resources.lib.comaddon import progress, VSlog #import du dialog progress
+import re
 
 #from resources.lib.util import cUtil #outils pouvant etre utiles
 
 # TODO
 # Faire une entrée pour les sorties : /sortie/AAAA
+# Serie
+# Genre
 
 SITE_IDENTIFIER = 'hds_stream'
 SITE_NAME = 'Hds-stream'
@@ -145,7 +148,8 @@ def showMovies(sSearch = ''):
       sUrl = sSearch
       sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?<div class="contenido"><p>([^"]+)</p>'
     else:
-        sPattern = 'class="data".*?href="([^"]+)">([^<]+).+?img src="([^"]+)"'
+        #sPattern = 'class="data".*?href="([^"]+)">([^<]+).+*img src="([^"]+)"'
+        sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+)'
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
@@ -176,13 +180,11 @@ def showMovies(sSearch = ''):
                 sTitle = aEntry[2]
                 sDesc = aEntry[3]
             else:
-                sThumb = aEntry[2]
-                sUrl = aEntry[0]
-                sTitle = aEntry[1]
+                sThumb ='https:' +  aEntry[0]
+                sUrl = aEntry[1]
+                sTitle = aEntry[2]
                 sDesc = '' # Temporaire
             
-            sTitle = sTitle.replace('En streaming', '')
-
             #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
             #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
             # sTitle = ('%s [%s] (%s) [COLOR coral]%s[/COLOR]') % (sTitle, sQual, sLang.upper(), sHoster)
@@ -200,7 +202,7 @@ def showMovies(sSearch = ''):
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
                 #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
-                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+                oGui.addMovie(SITE_IDENTIFIER, 'showLinks', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
                 #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
             #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
@@ -221,7 +223,7 @@ def showMovies(sSearch = ''):
 
 def __checkForNextPage(sHtmlContent): #cherche la page suivante
     oParser = cParser()
-    sPattern = '<div class="navigation".+? <span.+? <a href="([^"]+)">'
+    sPattern = 'a><a class=\'arrow_pag\' href="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
@@ -230,36 +232,89 @@ def __checkForNextPage(sHtmlContent): #cherche la page suivante
     return False
 
 
-def showHosters(): #recherche et affiche les hotes
-    oGui = cGui() #ouvre l'affichage
-    oInputParameterHandler = cInputParameterHandler() #apelle l'entree de parametre
-    sUrl = oInputParameterHandler.getValue('siteUrl') #apelle siteUrl
-    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle') #appelle le titre
-    sThumb = oInputParameterHandler.getValue('sThumb') #appelle le poster
-
-    oRequestHandler = cRequestHandler(sUrl) #requete sur l'url
-    sHtmlContent = oRequestHandler.request() #requete sur l'url
-
+def showLinks():
+    oGui = cGui()
     oParser = cParser()
-    sPattern = '<iframe.+?src="([^"]+)"'
-    #ici nous cherchons toute les sources iframe
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
+    sThumb = oInputParameterHandler.getValue('sThumb')
 
+    oRequest = cRequestHandler(sUrl)
+    sHtmlContent = oRequest.request()
+
+    sPattern = "class='loader'.+?data-type='([^']+)'.+?data-post='([^']+)'.+?data-nume='([^']+)'"
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #pensez a faire un VSlog(str(aResult)) pour verifier
 
-    #si un lien ne s'affiche pas peux etre que l'hote n'est pas supporte par l'addon
+    if (aResult[0] == True):
+        for aEntry in aResult[1]:
+            sUrl2 = URL_MAIN + 'wp-admin/admin-ajax.php'
+            dType = aEntry[0]
+            dPost = aEntry[1]
+            dNum = aEntry[2]
+            sHost = ''
+
+            if '1' in dNum:
+                sHost = 'Frenchvid'
+            elif '2' in dNum:
+                sHost = 'MyStream'
+            elif '3' in dNum:
+                sHost = 'UqLoad'
+
+            sTitle = ('%s [COLOR coral]%s[/COLOR]') % (sMovieTitle, sHost)
+            #Title = sMovieTitle + 'Lien' + dNum
+
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2)
+            oOutputParameterHandler.addParameter('referer', sUrl)
+            oOutputParameterHandler.addParameter('sMovieTitle', sMovieTitle)
+            oOutputParameterHandler.addParameter('sThumb', sThumb)
+            oOutputParameterHandler.addParameter('dType', dType)
+            oOutputParameterHandler.addParameter('dPost', dPost)
+            oOutputParameterHandler.addParameter('dNum', dNum)
+            oGui.addLink(SITE_IDENTIFIER, 'showHosters', sTitle, sThumb, '', oOutputParameterHandler)
+
+
+    oGui.setEndOfDirectory()
+
+def showHosters(): #recherche et affiche les hotes
+    oGui = cGui()
+    oParser = cParser()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
+    sThumb = oInputParameterHandler.getValue('sThumb')
+    referer = oInputParameterHandler.getValue('referer')
+    dPost = oInputParameterHandler.getValue('dPost')
+    dNum = oInputParameterHandler.getValue('dNum')
+    dType = oInputParameterHandler.getValue('dType')
+
+    pdata = 'action=doo_player_ajax&post=' + dPost + '&nume=' + dNum + '&type=' + dType
+    oRequest = cRequestHandler(sUrl)
+    oRequest.setRequestType(1)
+    oRequest.addHeaderEntry('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0')
+    oRequest.addHeaderEntry('Referer', referer)
+    oRequest.addHeaderEntry('Accept', '*/*')
+    oRequest.addHeaderEntry('Accept-Language', 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3')
+    oRequest.addHeaderEntry('Content-Type', 'application/x-www-form-urlencoded')
+    oRequest.addParametersLine(pdata)
+
+    sHtmlContent = oRequest.request()
+
+    sPattern = '<iframe.+?src="([^"]+)"'
+    aResult = oParser.parse(sHtmlContent, sPattern)
+
     if (aResult[0] == True):
         for aEntry in aResult[1]:
 
             sHosterUrl = aEntry
-            oHoster = cHosterGui().checkHoster(sHosterUrl) #recherche l'hote dans l'addon
+            oHoster = cHosterGui().checkHoster(sHosterUrl)
             if (oHoster != False):
-                oHoster.setDisplayName(sMovieTitle) #nom affiche
-                oHoster.setFileName(sMovieTitle) #idem
+                oHoster.setDisplayName(sMovieTitle)
+                oHoster.setFileName(sMovieTitle)
                 cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
-                #affiche le lien (oGui, oHoster, url du lien, poster)
 
-    oGui.setEndOfDirectory() #fin
+    oGui.setEndOfDirectory()
 
 #Pour les series, il y a generalement une etape en plus pour la selection des episodes ou saisons.
 def ShowSerieSaisonEpisodes():
