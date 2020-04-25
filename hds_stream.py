@@ -50,6 +50,10 @@ def load():
     oGui.addDir(SITE_IDENTIFIER, MOVIE_NEWS[1], 'Films (Derniers ajouts)', 'news.png', oOutputParameterHandler)
 
     oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'http://venom/')
+    oGui.addDir(SITE_IDENTIFIER, 'showMovieYears', 'Films (Par année)', 'films.png', oOutputParameterHandler)
+
+    oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', MOVIE_GENRES[0])
     oGui.addDir(SITE_IDENTIFIER, MOVIE_GENRES[1], 'Films (Genres)', 'genres.png', oOutputParameterHandler)
 
@@ -97,13 +101,13 @@ def showGenres():
     oGui.setEndOfDirectory()
 
 
-def showMovieYears():#creer une liste inversée d'annees
+def showMovieYears():
     oGui = cGui()
 
-    for i in reversed (xrange(1913, 2019)):
+    for i in reversed (xrange(1942, 2021)):
         Year = str(i)
         oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + 'films/annee-' + Year)
+        oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + 'sortie/' + Year)
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', Year, 'annees.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
@@ -131,6 +135,8 @@ def showMovies(sSearch = ''):
       sUrl = sSearch
       #sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?<div class="contenido"><p>([^"]+)</p>'
       sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?class="year">([^"]+)</span>.*?<div class="contenido"><p>([^"]+)</p>'
+    elif 'tendance/' in sUrl:
+        sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+).*?, ([^"]+)</span>'
     else:
         #sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+)'
         sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+).*?, ([^"]+)</span>.*?<div class="texto">([^"]+)</div>'
@@ -156,7 +162,7 @@ def showMovies(sSearch = ''):
 
             if sSearch:
                 sThumb = aEntry[1]
-                sUrl = aEntry[0]
+                sUrl2 = aEntry[0]
                 sTitle = aEntry[2]
                 sDesc = aEntry[4]
                 sYear = aEntry[3]
@@ -164,10 +170,13 @@ def showMovies(sSearch = ''):
                 sThumb = aEntry[0]
                 if sThumb.startswith('//'):
                     sThumb = 'https:' + sThumb
-                sUrl = aEntry[1]
+                if 'tendance/' in sUrl:
+                    sDesc =''
+                else:
+                    sDesc = aEntry[4]
+                sUrl2 = aEntry[1]
                 sTitle = aEntry[2]
                 sYear = aEntry[3]
-                sDesc = aEntry[4]
 
             sDisplayTitle = ('%s (%s)') % (sTitle, sYear)
             
@@ -180,11 +189,11 @@ def showMovies(sSearch = ''):
             #sUrl2 = URL_MAIN + sUrl2
 
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl)
+            oOutputParameterHandler.addParameter('siteUrl', sUrl2)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
 
-            if '/series' in sUrl:
+            if '/series' in sUrl2:
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
                 #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
