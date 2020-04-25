@@ -72,37 +72,22 @@ def showSearch():
         return
 
 
-def showGenres(): #affiche les genres
+def showGenres(): 
     oGui = cGui()
 
-    #juste a entrer les categories et les liens qui vont bien
     liste = []
-    liste.append( ['Action', URL_MAIN + 'action/'] )
-    liste.append( ['Animation', URL_MAIN + 'animation/'] )
-    liste.append( ['Arts Martiaux', URL_MAIN + 'arts-martiaux/'] )
-    liste.append( ['Aventure', URL_MAIN + 'aventure/'] )
-    liste.append( ['Biopic', URL_MAIN + 'biopic/'] )
-    liste.append( ['Comédie', URL_MAIN + 'comedie/'] )
-    liste.append( ['Comédie Dramatique', URL_MAIN + 'comedie-dramatique/'] )
-    liste.append( ['Comédie Musicale', URL_MAIN + 'comedie-musicale/'] )
-    liste.append( ['Documentaire', URL_MAIN + 'documentaire/'] )
-    liste.append( ['Drame', URL_MAIN + 'drame/'] )
-    liste.append( ['Epouvante Horreur', URL_MAIN + 'epouvante-horreur/'] )
-    liste.append( ['Erotique', URL_MAIN + 'erotique'] )
-    liste.append( ['Espionnage', URL_MAIN + 'espionnage/'] )
-    liste.append( ['Famille', URL_MAIN + 'famille/'] )
-    liste.append( ['Fantastique', URL_MAIN + 'fantastique/'] )
-    liste.append( ['Guerre', URL_MAIN + 'guerre/'] )
-    liste.append( ['Historique', URL_MAIN + 'historique/'] )
-    liste.append( ['Musical', URL_MAIN + 'musical/'] )
-    liste.append( ['Policier', URL_MAIN + 'policier/'] )
-    liste.append( ['Péplum', URL_MAIN + 'peplum/'] )
-    liste.append( ['Romance', URL_MAIN + 'romance/'] )
-    liste.append( ['Science Fiction', URL_MAIN + 'science-fiction/'] )
-    liste.append( ['Spectacle', URL_MAIN + 'spectacle/'] )
-    liste.append( ['Thriller', URL_MAIN + 'thriller/'] )
-    liste.append( ['Western', URL_MAIN + 'western/'] )
-    liste.append( ['Divers', URL_MAIN + 'divers/'] )
+    liste.append( ['Action', URL_MAIN + 'genre/action'] )
+    liste.append( ['Animation', URL_MAIN + 'genre/animation/'] )
+    liste.append( ['Aventure', URL_MAIN + 'genre/aventure/'] )
+    liste.append( ['Comédie', URL_MAIN + 'genre/comedie/'] )
+    liste.append( ['Drame', URL_MAIN + 'genre/drame/'] )
+    liste.append( ['Horreur', URL_MAIN + 'genre/horreur/'] )
+    liste.append( ['Fantastique', URL_MAIN + 'genre/fantastique/'] )
+    liste.append( ['Histoire', URL_MAIN + 'genre/histoire/'] )
+    liste.append( ['Science Fiction', URL_MAIN + 'genre/science-fiction/'] )
+    liste.append( ['Crime', URL_MAIN + 'genre/crime/'] )
+    liste.append( ['Thriller', URL_MAIN + 'genre/thriller/'] )
+    liste.append( ['Mystère', URL_MAIN + 'genre/mystere/'] )
 
     for sTitle, sUrl in liste: #boucle
 
@@ -306,7 +291,6 @@ def showHosters(): #recherche et affiche les hotes
 
     if (aResult[0] == True):
         for aEntry in aResult[1]:
-
             sHosterUrl = aEntry
             oHoster = cHosterGui().checkHoster(sHosterUrl)
             if (oHoster != False):
