@@ -15,7 +15,6 @@ import re
 # TODO
 # Faire une entrée pour les sorties : /sortie/AAAA
 # Serie
-# Genre
 
 SITE_IDENTIFIER = 'hds_stream'
 SITE_NAME = 'Hds-stream'
@@ -89,12 +88,11 @@ def showGenres():
     liste.append( ['Thriller', URL_MAIN + 'genre/thriller/'] )
     liste.append( ['Mystère', URL_MAIN + 'genre/mystere/'] )
 
-    for sTitle, sUrl in liste: #boucle
+    for sTitle, sUrl in liste: 
 
         oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', sUrl) #sortie de l'url en parametre
+        oOutputParameterHandler.addParameter('siteUrl', sUrl) 
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', sTitle, 'genres.png', oOutputParameterHandler)
-        #ajouter un dossier vers la fonction showMovies avec le titre de chaque categorie.
 
     oGui.setEndOfDirectory()
 
@@ -131,19 +129,16 @@ def showMovies(sSearch = ''):
 
     if sSearch:
       sUrl = sSearch
-      sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?<div class="contenido"><p>([^"]+)</p>'
+      #sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?<div class="contenido"><p>([^"]+)</p>'
+      sPattern = '<div class="result-item">.*?<a href="([^"]+)"><img src="([^"]+)".*?<div class="title"><a.*?>([^"]+)</a.*?class="year">([^"]+)</span>.*?<div class="contenido"><p>([^"]+)</p>'
     else:
-        #sPattern = 'class="data".*?href="([^"]+)">([^<]+).+*img src="([^"]+)"'
-        sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+)'
+        #sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+)'
+        sPattern = 'id="post-[0-9].+?<img src="([^"]+)".+?class="data".+?href="([^"]+)">([^<]+).*?, ([^"]+)</span>.*?<div class="texto">([^"]+)</div>'
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
     
     aResult = oParser.parse(sHtmlContent, sPattern)
-    #le plus simple et de faire un  VSlog(str(aResult))
-    #dans le fichier log d'xbmc vous pourrez voir un array de ce que recupere le script
-    #et modifier sPattern si besoin
-    #VSlog(str(aResult)) #Commenter ou supprimer cette ligne une fois fini
 
     #affiche une information si aucun resulat
     if (aResult[0] == False):
@@ -163,12 +158,18 @@ def showMovies(sSearch = ''):
                 sThumb = aEntry[1]
                 sUrl = aEntry[0]
                 sTitle = aEntry[2]
-                sDesc = aEntry[3]
+                sDesc = aEntry[4]
+                sYear = aEntry[3]
             else:
-                sThumb ='https:' +  aEntry[0]
+                sThumb = aEntry[0]
+                if sThumb.startswith('//'):
+                    sThumb = 'https:' + sThumb
                 sUrl = aEntry[1]
                 sTitle = aEntry[2]
-                sDesc = '' # Temporaire
+                sYear = aEntry[3]
+                sDesc = aEntry[4]
+
+            sDisplayTitle = ('%s (%s)') % (sTitle, sYear)
             
             #Si vous avez des information dans aEntry Qualiter lang organiser un peux vos titre exemple.
             #Si vous pouvez la langue et la Qualite en MAJ ".upper()" vostfr.upper() = VOSTFR
@@ -187,7 +188,8 @@ def showMovies(sSearch = ''):
                 oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
                 #addTV pour sortir les series tv (identifiant, function, titre, icon, poster, description, sortie parametre)
             else:
-                oGui.addMovie(SITE_IDENTIFIER, 'showLinks', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+                #oGui.addMovie(SITE_IDENTIFIER, 'showLinks', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+                oGui.addMovie(SITE_IDENTIFIER, 'showLinks', sDisplayTitle, '', sThumb, sDesc, oOutputParameterHandler)
                 #addMovies pour sortir les films (identifiant, function, titre, icon, poster, description, sortie parametre)
 
             #il existe aussi addMisc(identifiant, function, titre, icon, poster, description, sortie parametre)
@@ -208,7 +210,7 @@ def showMovies(sSearch = ''):
 
 def __checkForNextPage(sHtmlContent): #cherche la page suivante
     oParser = cParser()
-    sPattern = 'a><a class=\'arrow_pag\' href="([^"]+)"'
+    sPattern = 'class="current".+?a href="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
